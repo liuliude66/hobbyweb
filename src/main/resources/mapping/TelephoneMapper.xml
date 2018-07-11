@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sms.forum.dao.TelDao">
+
+    <resultMap id="TelephoneBaseMap" type="com.sms.forum.model.Telephone">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="telephone" property="telephone" jdbcType="VARCHAR"/>
+        <result column="upload_t" property="uploadTime" jdbcType="DATE"/>
+        <result column="uploader" property="uploader" jdbcType="VARCHAR"/>
+        <result column="sended" property="sended" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="selectTelByUploader" parameterType="java.lang.String" resultMap="TelephoneBaseMap">
+        select * from t_tel where uploader = #{uploader} and sended = 0
+    </select>
+
+    <!-- myself:批量插入 -->
+    <insert id="insertTelephones" parameterType="java.util.List">
+        insert into t_tel(telephone, upload_t, uploader) values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.telephone, jdbcType=VARCHAR},
+             #{item.uploadTime, jdbcType=DATE},
+             #{item.uploader, jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+</mapper>

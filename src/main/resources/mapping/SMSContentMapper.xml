@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sms.forum.dao.SMSContentDao">
+
+    <resultMap id="SMSContentBaseMap" type="com.sms.forum.model.SMSContent">
+        <id column="content_id" property="contentId" jdbcType="BIGINT"/>
+        <result column="upload_t" property="uploadTime" jdbcType="DATE"/>
+        <result column="uploader" property="uploader" jdbcType="VARCHAR"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="selectSmsContentByUploader" parameterType="java.lang.String" resultMap="SMSContentBaseMap">
+        select * from t_content where uploader = #{uploader}
+    </select>
+
+    <insert id="insertSmsContent" parameterType="com.sms.forum.model.SMSContent">
+        insert into t_content(upload_t, uploader, content) values(#{uploadTime}, #{uploader}, #{content})
+    </insert>
+</mapper>
