@@ -104,7 +104,7 @@ public class AccountController {
         return response;
     }
 
-    @RequestMapping(value = "/login.do", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(value = "/login.do")
     @ResponseBody
     public ApiResponse<Account> login(HttpServletRequest request, @RequestBody Account act) {//@RequestParam("username"), String username, String password
         ApiResponse<Account> result = new ApiResponse<Account>();
@@ -137,18 +137,14 @@ public class AccountController {
             return result;
         }
 
-        try {
-            String sessionid = request.getHeader("sessionid");
-            //将session写入缓存
-            Object tempSession = MemcacheManager.get().get(sessionid);
-            System.out.println(TimeUtils.timeStamp2Date(TimeUtils.timeStamp(), "yyyy-MM-dd HH:mm:ss") + "--tempSession---->" + tempSession);
-            if (!ObjectUtils.isEmpty(tempSession)) {
-                MemcacheManager.get().update(username, account.getUsername(), SESSION_EXT);
-            } else {
-                MemcacheManager.get().add(username, account.getUsername(), SESSION_EXT);
-            }
-        }catch (Exception e) {
-            e.printStackTrace();
+        String sessionid = request.getHeader("sessionid");
+        //将session写入缓存
+        Object tempSession = MemcacheManager.get().get(sessionid);
+        System.out.println(TimeUtils.timeStamp2Date(TimeUtils.timeStamp(), "yyyy-MM-dd HH:mm:ss") + "--tempSession---->" + tempSession);
+        if (!ObjectUtils.isEmpty(tempSession)) {
+            MemcacheManager.get().update(username, account.getUsername(), SESSION_EXT);
+        } else {
+            MemcacheManager.get().add(username, account.getUsername(), SESSION_EXT);
         }
         //验证session 有效期
         result.data = account;
