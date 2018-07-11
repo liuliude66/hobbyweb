@@ -4,7 +4,7 @@ public class ApiResponse<T> {
     public int code = ResponseCode.OK;
     public String msg = "success";
     public T data;
-    public long system_time;
+    public long systemTime;
 
     public ApiResponse() {
 

@@ -9,17 +9,12 @@ import com.sms.forum.service.IAccountService;
 import com.sms.forum.utils.SessionHelper;
 import com.sms.forum.utils.TimeUtils;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.sql.Time;
-import java.util.Enumeration;
 import java.util.List;
 
 @Controller
@@ -109,18 +104,22 @@ public class AccountController {
         return response;
     }
 
-    @RequestMapping(value = "/login.do")
+    @RequestMapping(value = "/login.do", method = RequestMethod.POST, consumes = "application/json")
     @ResponseBody
-    public ApiResponse<Account> login(HttpServletRequest request, String username, String password) {
+    public ApiResponse<Account> login(HttpServletRequest request, @RequestBody Account act) {//@RequestParam("username"), String username, String password
         ApiResponse<Account> result = new ApiResponse<Account>();
+        String username = act.getUsername();//request.getParameter("username");
         if (StringUtils.isEmpty(username) || username.length() < 5) {
             result.code = ResponseCode.LOGIN_ERROR_NULL;
             result.msg = "请输入正确的用户账号信息";
+            result.data = null;
             return result;
         }
+        String password = act.getPassword();//request.getParameter("password");
         if (StringUtils.isEmpty(password) || password.length() < 5) {
             result.code = ResponseCode.LOGIN_ERROR_NULL;
             result.msg = "请输入正确的用户密码信息";
+            result.data = null;
             return result;
         }
         //Enumeration<String> headers = request.getHeaderNames();
@@ -128,22 +127,28 @@ public class AccountController {
         if (account == null) {
             result.code = ResponseCode.LOGIN_ERROR_USERNAME;
             result.msg = "该账号不存在";
+            result.data = null;
             return result;
         }
         if (!account.getPassword().equals(password)) {
             result.code = ResponseCode.LOGIN_ERROR_PASSWORD;
             result.msg = "请输入正确的密码";
+            result.data = null;
             return result;
         }
 
-        String sessionid = request.getHeader("sessionid");
-        //将session写入缓存
-        Object tempSession = MemcacheManager.get().get(sessionid);
-        System.out.println(TimeUtils.timeStamp2Date(TimeUtils.timeStamp(), "yyyy-MM-dd HH:mm:ss") + "--tempSession---->" + tempSession);
-        if (!StringUtils.isEmpty(tempSession)) {
-            MemcacheManager.get().update(username, account, SESSION_EXT);
-        } else {
-            MemcacheManager.get().add(username, account, SESSION_EXT);
+        try {
+            String sessionid = request.getHeader("sessionid");
+            //将session写入缓存
+            Object tempSession = MemcacheManager.get().get(sessionid);
+            System.out.println(TimeUtils.timeStamp2Date(TimeUtils.timeStamp(), "yyyy-MM-dd HH:mm:ss") + "--tempSession---->" + tempSession);
+            if (!ObjectUtils.isEmpty(tempSession)) {
+                MemcacheManager.get().update(username, account.getUsername(), SESSION_EXT);
+            } else {
+                MemcacheManager.get().add(username, account.getUsername(), SESSION_EXT);
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
         }
         //验证session 有效期
         result.data = account;

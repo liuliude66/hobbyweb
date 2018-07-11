@@ -1,8 +1,9 @@
 package com.sms.forum.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Account {
+public class Account implements Serializable {
 
     private Long id;
     private String username;//用户名
@@ -18,6 +19,8 @@ public class Account {
     private Integer isEnabled;//是否被禁用
     private String phoneImei;//注册的手机IMEI
     private String telephone;//手机号码
+
+    public Account(){}
 
     public Long getId() {
         return id;
